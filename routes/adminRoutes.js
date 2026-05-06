@@ -11,4 +11,7 @@ router.post('/add-course', adminController.addCourse);
 router.get('/courses', adminController.getAllCourses);
 router.get('/report', adminController.getFullReport);
 
+router.get('/excuses', adminController.getPendingExcuses);
+router.put('/excuses/:id', adminController.updateExcuseStatus);
+
 module.exports = router;

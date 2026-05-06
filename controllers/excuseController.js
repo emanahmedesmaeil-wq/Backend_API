@@ -23,6 +23,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
+// دالة رفع العذر (معدلة لكشف الخطأ)
 const submitExcuse = async (req, res) => {
     const { student_id, course_id } = req.body;
     
@@ -33,17 +34,22 @@ const submitExcuse = async (req, res) => {
     const image_path = '/' + req.file.path.replace(/\\/g, '/');
 
     try {
-        const query = 'INSERT INTO excuses (student_id, course_id, image_path, status) VALUES (?, ?, ?, "pending")';
-        await db.query(query, [student_id, course_id, image_path]);
+        // تم حل مشكلة الـ pending باستخدام علامات التنصيص الفردية
+        const query = "INSERT INTO excuses (student_id, course_id, image_path, status) VALUES (?, ?, ?, 'pending')";
         
+        await db.query(query, [student_id, course_id, image_path]);
+
         res.status(200).json({ 
             message: 'تم إرسال العذر الطبي بنجاح وبانتظار المراجعة',
             image_url: image_path
         });
     } catch (err) {
         console.error('Database Error:', err);
-        return res.status(500).json({ message: 'خطأ أثناء حفظ العذر' });
+        return res.status(500).json({ 
+            message: 'خطأ أثناء حفظ العذر',
+            db_error: err.message, 
+            sql_query: err.sql
+        });
     }
 };
-
 module.exports = { submitExcuse, upload };

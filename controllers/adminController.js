@@ -98,5 +98,37 @@ const getFullReport = async (req, res) => {
         return res.status(500).json({ message: 'خطأ في توليد التقرير' });
     }
 };
+// أضف هذه الدوال قبل الـ module.exports مباشرة
+const getPendingExcuses = async (req, res) => {
+    try {
+        const query = `
+            SELECT e.excuse_id, e.image_path, e.status, s.name AS student_name, c.course_name 
+            FROM excuses e
+            JOIN students s ON e.student_id = s.student_id
+            JOIN courses c ON e.course_id = c.course_id
+            WHERE e.status = 'pending'
+        `;
+        const [results] = await db.query(query);
+        res.status(200).json({ excuses: results });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'خطأ في جلب الأعذار' });
+    }
+};
 
-module.exports = { addStudent, getAllStudents, addProfessor, getAllProfessors, addCourse, getAllCourses, getFullReport };
+const updateExcuseStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    try {
+        await db.query("UPDATE excuses SET status = ? WHERE excuse_id = ?", [status, id]);
+        res.status(200).json({ message: 'تم تحديث حالة العذر بنجاح!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'خطأ في التحديث' });
+    }
+};
+module.exports = { 
+    addStudent, getAllStudents, addProfessor, getAllProfessors, 
+    addCourse, getAllCourses, getFullReport, 
+    getPendingExcuses, updateExcuseStatus 
+};

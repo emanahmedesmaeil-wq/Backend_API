@@ -86,7 +86,11 @@ const getFullReport = async (req, res) => {
                 s.name AS student_name,
                 c.course_name,
                 (SELECT COUNT(*) FROM lectures WHERE course_id = c.course_id) AS total_lectures,
-                (SELECT COUNT(*) FROM attendance a JOIN lectures l ON a.lecture_id = l.lecture_id WHERE a.student_id = s.student_id AND l.course_id = c.course_id) AS attended_count
+                (
+                    (SELECT COUNT(*) FROM attendance a JOIN lectures l ON a.lecture_id = l.lecture_id WHERE a.student_id = s.student_id AND l.course_id = c.course_id) 
+                    + 
+                    (SELECT COUNT(*) FROM excuses WHERE student_id = s.student_id AND course_id = c.course_id AND status = 'approved')
+                ) AS attended_count
             FROM students s
             JOIN courses c
             HAVING total_lectures > 0

@@ -11,14 +11,17 @@ const getStudentDashboard = async (req, res) => {
             SELECT 
                 c.course_id, 
                 c.course_name, 
-                COUNT(DISTINCT l.lecture_id) AS total_lectures,
-                COUNT(DISTINCT a.id) AS attended_lectures
+                (SELECT COUNT(*) FROM lectures WHERE course_id = c.course_id) AS total_lectures,
+                (
+                    (SELECT COUNT(DISTINCT a.id) FROM attendance a JOIN lectures l ON a.lecture_id = l.lecture_id WHERE a.student_id = ? AND l.course_id = c.course_id)
+                    +
+                    (SELECT COUNT(*) FROM excuses WHERE student_id = ? AND course_id = c.course_id AND status = 'approved')
+                ) AS attended_lectures
             FROM courses c
-            LEFT JOIN lectures l ON c.course_id = l.course_id
-            LEFT JOIN attendance a ON l.lecture_id = a.lecture_id AND a.student_id = ?
             GROUP BY c.course_id
         `;
-        const [results] = await db.query(query, [student_id]);
+        // نمرر student_id مرتين للاستعلام (مرة للحضور ومرة للأعذار)
+        const [results] = await db.query(query, [student_id, student_id]);
 
         const coursesData = results.map(course => {
             const total = course.total_lectures;

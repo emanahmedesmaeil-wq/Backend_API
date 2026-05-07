@@ -138,11 +138,45 @@ const getStudentExcuses = async (req, res) => {
         res.status(500).json({ success: false, message: 'حدث خطأ أثناء جلب الأعذار' });
     }
 };
+const getCourseAttendanceLogs = async (req, res) => {
+    const { student_id, course_id } = req.params;
 
+    try {
+        // 1. جلب سجلات الحضور الفعلي (عبر QR)
+        const attendanceQuery = `
+            SELECT a.scan_time AS date, 'حضور' AS status, 'qr' AS type
+            FROM attendance a
+            JOIN lectures l ON a.lecture_id = l.lecture_id
+            WHERE a.student_id = ? AND l.course_id = ?
+        `;
+
+        // 2. جلب سجلات الأعذار المقبولة (تعتبر حضور)
+        const excusesQuery = `
+            SELECT 'عذر مقبول' AS date, 'حضور (عذر)' AS status, 'excuse' AS type
+            FROM excuses 
+            WHERE student_id = ? AND course_id = ? AND status = 'approved'
+        `;
+
+        const [attendanceResults] = await db.query(attendanceQuery, [student_id, course_id]);
+        const [excuseResults] = await db.query(excusesQuery, [student_id, course_id]);
+
+        // دمج النتائج وترتيبها
+        const allLogs = [...attendanceResults, ...excuseResults];
+
+        res.status(200).json({
+            success: true,
+            logs: allLogs
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'خطأ في جلب سجلات المادة' });
+    }
+};
 // ضفنا الدالة الجديدة هنا عشان تتصدر بشكل صحيح
 module.exports = { 
     getStudentDashboard, 
     scanQR, 
     getAttendanceReport, 
-    getStudentExcuses 
-};
+    getStudentExcuses,
+    getCourseAttendanceLogs
+};``

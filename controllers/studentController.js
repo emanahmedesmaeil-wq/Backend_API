@@ -119,4 +119,27 @@ const getAttendanceReport = async (req, res) => {
     }
 };
 
-module.exports = { getStudentDashboard, scanQR, getAttendanceReport };
+const getStudentExcuses = async (req, res) => {
+    const studentId = req.params.id;
+    try {
+        // شلنا التعليق عشان الدالة تقرأ من قاعدة البيانات فعلياً
+        const query = 'SELECT * FROM excuses WHERE student_id = ? ORDER BY created_at DESC';
+        const [excuses] = await db.query(query, [studentId]);
+        
+        res.status(200).json({
+            success: true,
+            data: excuses
+        });
+    } catch (err) {
+        console.error('Error fetching excuses:', err);
+        res.status(500).json({ success: false, message: 'حدث خطأ أثناء جلب الأعذار' });
+    }
+};
+
+// ضفنا الدالة الجديدة هنا عشان تتصدر بشكل صحيح
+module.exports = { 
+    getStudentDashboard, 
+    scanQR, 
+    getAttendanceReport, 
+    getStudentExcuses 
+};

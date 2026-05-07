@@ -12,4 +12,6 @@ router.post('/scan', studentController.scanQR);
 const excuseController = require('../controllers/excuseController');
 router.post('/excuse', excuseController.upload.single('image'), excuseController.submitExcuse);
 
+router.get('/excuses/:id', studentController.getStudentExcuses);
+
 module.exports = router;

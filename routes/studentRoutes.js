@@ -14,4 +14,7 @@ router.post('/excuse', excuseController.upload.single('image'), excuseController
 
 router.get('/excuses/:id', studentController.getStudentExcuses);
 
+// ضيف السطر ده مع مسارات الطالب
+router.get('/course-logs/:student_id/:course_id', studentController.getCourseAttendanceLogs);
+
 module.exports = router;

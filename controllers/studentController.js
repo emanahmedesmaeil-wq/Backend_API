@@ -122,8 +122,8 @@ const getAttendanceReport = async (req, res) => {
 const getStudentExcuses = async (req, res) => {
     const studentId = req.params.id;
     try {
-        // شلنا التعليق عشان الدالة تقرأ من قاعدة البيانات فعلياً
-        const query = 'SELECT * FROM excuses WHERE student_id = ? ORDER BY created_at DESC';
+        // تم التعديل هنا: الترتيب بـ excuse_id بدل created_at اللي مش موجود
+        const query = 'SELECT * FROM excuses WHERE student_id = ? ORDER BY excuse_id DESC';
         const [excuses] = await db.query(query, [studentId]);
         
         res.status(200).json({

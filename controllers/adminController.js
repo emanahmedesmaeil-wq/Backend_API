@@ -175,14 +175,15 @@ const updateManualAttendance = async (req, res) => {
 const getAllLectures = async (req, res) => {
     try {
         const query = `
-            SELECT l.lecture_id, l.lecture_date, c.course_name 
+            SELECT l.lecture_id, l.lecture_date, COALESCE(c.course_name, l.course_id) AS course_name 
             FROM lectures l 
-            JOIN courses c ON l.course_id = c.course_id 
+            LEFT JOIN courses c ON l.course_id = c.course_id 
             ORDER BY l.lecture_id DESC
         `;
         const [results] = await db.query(query);
         res.status(200).json(results);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'خطأ في جلب المحاضرات' });
     }
 };

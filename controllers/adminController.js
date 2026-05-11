@@ -172,8 +172,22 @@ const updateManualAttendance = async (req, res) => {
         return res.status(500).json({ success: false, message: 'خطأ في قاعدة البيانات أثناء التعديل' });
     }
 };
+const getAllLectures = async (req, res) => {
+    try {
+        const query = `
+            SELECT l.lecture_id, l.lecture_date, c.course_name 
+            FROM lectures l 
+            JOIN courses c ON l.course_id = c.course_id 
+            ORDER BY l.lecture_id DESC
+        `;
+        const [results] = await db.query(query);
+        res.status(200).json(results);
+    } catch (err) {
+        res.status(500).json({ message: 'خطأ في جلب المحاضرات' });
+    }
+};
 module.exports = { 
     addStudent, getAllStudents, addProfessor, getAllProfessors, 
     addCourse, getAllCourses, getFullReport, 
-    getPendingExcuses, updateExcuseStatus ,updateManualAttendance
+    getPendingExcuses, updateExcuseStatus ,updateManualAttendance,getAllLectures
 };

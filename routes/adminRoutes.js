@@ -15,5 +15,6 @@ router.get('/excuses', adminController.getPendingExcuses);
 router.put('/excuses/:id', adminController.updateExcuseStatus);
 
 router.post('/manual-attendance', adminController.updateManualAttendance);
+router.get('/lectures', adminController.getAllLectures);
 
 module.exports = router;

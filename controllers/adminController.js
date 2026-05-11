@@ -131,8 +131,49 @@ const updateExcuseStatus = async (req, res) => {
         res.status(500).json({ message: 'خطأ في التحديث' });
     }
 };
+const updateManualAttendance = async (req, res) => {
+    const { student_id, lecture_id, status } = req.body;
+    
+    if (!student_id || !lecture_id || !status) {
+        return res.status(400).json({ success: false, message: 'الرجاء إدخال جميع البيانات المطلوبة' });
+    }
+
+    try {
+        if (status === 'حاضر') {
+            // التحقق مما إذا كان الطالب مسجلاً بالفعل لتجنب التكرار
+            const checkQuery = "SELECT * FROM attendance WHERE student_id = ? AND lecture_id = ?";
+            const [results] = await db.query(checkQuery, [student_id, lecture_id]);
+            
+            if (results.length > 0) {
+                return res.status(400).json({ success: false, message: 'الطالب مسجل كحاضر بالفعل في هذه المحاضرة' });
+            }
+
+            // إضافة الحضور
+            const insertQuery = "INSERT INTO attendance (student_id, lecture_id, scan_time) VALUES (?, ?, NOW())";
+            await db.query(insertQuery, [student_id, lecture_id]);
+            return res.status(200).json({ success: true, message: 'تم تسجيل الحضور يدوياً بنجاح! ✅' });
+
+        } else if (status === 'غائب') {
+            // إلغاء الحضور (حذف السجل من جدول attendance)
+            const deleteQuery = "DELETE FROM attendance WHERE student_id = ? AND lecture_id = ?";
+            const [result] = await db.query(deleteQuery, [student_id, lecture_id]);
+            
+            if (result.affectedRows === 0) {
+                return res.status(400).json({ success: false, message: 'الطالب غير مسجل كحاضر أصلاً لإلغاء حضوره' });
+            }
+            
+            return res.status(200).json({ success: true, message: 'تم تعديل الحالة إلى غائب (إلغاء الحضور) بنجاح! ❌' });
+            
+        } else {
+            return res.status(400).json({ success: false, message: 'حالة غير صالحة' });
+        }
+    } catch (err) {
+        console.error('Manual Update Error:', err);
+        return res.status(500).json({ success: false, message: 'خطأ في قاعدة البيانات أثناء التعديل' });
+    }
+};
 module.exports = { 
     addStudent, getAllStudents, addProfessor, getAllProfessors, 
     addCourse, getAllCourses, getFullReport, 
-    getPendingExcuses, updateExcuseStatus 
+    getPendingExcuses, updateExcuseStatus ,updateManualAttendance
 };

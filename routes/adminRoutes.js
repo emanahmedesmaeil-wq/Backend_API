@@ -11,8 +11,9 @@ router.post('/add-professor', adminController.addProfessor);
 router.post('/add-course', adminController.addCourse);
 router.get('/report', adminController.getFullReport);
 
-// أضف هذه المسارات الجديدة هنا لفك تشفير الـ 404
 router.get('/excuses', adminController.getPendingExcuses);
 router.put('/excuses/:id', adminController.updateExcuseStatus);
+
+router.post('/manual-attendance', adminController.updateManualAttendance);
 
 module.exports = router;

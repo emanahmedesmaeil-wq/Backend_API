@@ -174,8 +174,12 @@ const updateManualAttendance = async (req, res) => {
 };
 const getAllLectures = async (req, res) => {
     try {
+        // استخدام LEFT JOIN لضمان ظهور المحاضرات حتى لو فشل الربط مع جدول المواد
         const query = `
-            SELECT l.lecture_id, l.lecture_date, COALESCE(c.course_name, l.course_id) AS course_name 
+            SELECT 
+                l.lecture_id, 
+                l.lecture_date, 
+                COALESCE(c.course_name, l.course_id) AS course_name 
             FROM lectures l 
             LEFT JOIN courses c ON l.course_id = c.course_id 
             ORDER BY l.lecture_id DESC
@@ -183,7 +187,7 @@ const getAllLectures = async (req, res) => {
         const [results] = await db.query(query);
         res.status(200).json(results);
     } catch (err) {
-        console.error(err);
+        console.error("Database Error:", err);
         res.status(500).json({ message: 'خطأ في جلب المحاضرات' });
     }
 };

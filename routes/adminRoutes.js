@@ -17,4 +17,6 @@ router.put('/excuses/:id', adminController.updateExcuseStatus);
 router.post('/manual-attendance', adminController.updateManualAttendance);
 router.get('/lectures', adminController.getAllLectures);
 
+router.delete('/lectures/:id', adminController.deleteLecture);
+router.get('/attendance/count', adminController.getLectureAttendanceCount);
 module.exports = router;

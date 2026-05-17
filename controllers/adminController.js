@@ -191,8 +191,42 @@ const getAllLectures = async (req, res) => {
         res.status(500).json({ message: 'خطأ في جلب المحاضرات' });
     }
 };
+
+const deleteLecture = async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        // استخدمنا اسم الجدول lectures ليطابق قاعدة بياناتك
+        const sql = "DELETE FROM lectures WHERE lecture_id = ?";
+        await db.query(sql, [id]);
+        
+        res.status(200).json({ success: true, message: "تم مسح المحاضرة بنجاح" });
+    } catch (err) {
+        console.error('Delete Lecture Error:', err);
+        return res.status(500).json({ success: false, message: "حدث خطأ في قاعدة البيانات أثناء الحذف" });
+    }
+};
+
+// دالة جلب عدد الحضور
+const getLectureAttendanceCount = async (req, res) => {
+    const { lecture_id } = req.query;
+    
+    try {
+        // نعد فقط السجلات الموجودة في جدول attendance للمحاضرة المطلوبة
+        const sql = "SELECT COUNT(*) AS count FROM attendance WHERE lecture_id = ?";
+        const [results] = await db.query(sql, [lecture_id]);
+        
+        res.status(200).json({ success: true, count: results[0].count });
+    } catch (err) {
+        console.error('Count Attendance Error:', err);
+        return res.status(500).json({ success: false, message: "حدث خطأ في قاعدة البيانات" });
+    }
+};
+
+// تصدير كل الدوال بشكل مجمع وصحيح
 module.exports = { 
     addStudent, getAllStudents, addProfessor, getAllProfessors, 
     addCourse, getAllCourses, getFullReport, 
-    getPendingExcuses, updateExcuseStatus ,updateManualAttendance,getAllLectures
+    getPendingExcuses, updateExcuseStatus, updateManualAttendance,
+    getAllLectures, deleteLecture, getLectureAttendanceCount
 };
